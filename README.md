@@ -1,0 +1,1 @@
+# soat-basic-infra-aws
