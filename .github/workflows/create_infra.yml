@@ -1,0 +1,34 @@
+name: Terraform VPC
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-basic-infra:
+    name: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v3
+      #AWS CREDENTIALS
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION}}
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-session-name: myGitHubActions
+      #Terraform execution
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform plan -out=plan
+
+      # - name: Terraform Apply
+      # run: terraform apply "plan" -auto-approve
+      # env:
+      #   TF_VAR_ecr_image: ${{ vars.ECR_IMAGE }}
+      #   TF_VAR_execution_role_ecs: ${{ secrets.ECS_EXECUTION_ROLE }}
