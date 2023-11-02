@@ -14,13 +14,15 @@ variable "aws_az_b" {
 }
 
 variable "ecr_image" { 
-  type = string
-  default = "ecr_image_url"
+  description = "ECR Image"
+  type        = string
+  sensitive   = true
 }
 
 variable "execution_role_ecs" { 
-  type = string
-  default = "arn_execution_role_ecs"
+  description = "Execution role ECS"
+  type        = string
+  sensitive   = true
 }
 
 variable "desired_tasks" { 

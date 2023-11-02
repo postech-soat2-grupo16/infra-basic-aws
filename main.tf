@@ -2,6 +2,18 @@ provider "aws" {
   region = var.aws_region
 }
 
+#Configuração do Terraform State
+terraform {
+  backend "s3" {
+    bucket         = "terraform-state-soat"
+    key            = "infra-basic-aws/terraform.tfstate"
+    region         = "us-east-1"
+
+    dynamodb_table = "terraform-state-soat-locking"
+    encrypt        = true
+  }
+}
+
 ### VPC CONFIG ###
 
 resource "aws_vpc" "vpc_soat" {

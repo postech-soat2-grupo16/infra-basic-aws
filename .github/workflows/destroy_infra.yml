@@ -24,10 +24,13 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Apply
+      - name: Terraform Plan
         run: terraform plan -destroy -out=plan
+        env:
+        TF_VAR_ecr_image: ${{ vars.ECR_IMAGE }}
+        TF_VAR_execution_role_ecs: ${{ secrets.ECS_EXECUTION_ROLE }}
 
-      # - name: Terraform Apply
+      # - name: Terraform Apply Destroy
       # run: terraform apply "plan" -auto-approve
       # env:
       #   TF_VAR_ecr_image: ${{ vars.ECR_IMAGE }}
