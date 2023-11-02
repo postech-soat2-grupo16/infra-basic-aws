@@ -24,7 +24,7 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Apply Destroy
+      - name: Terraform Apply
         run: terraform apply -auto-approve
         env:
           TF_VAR_ecr_image: ${{ vars.ECR_IMAGE }}
