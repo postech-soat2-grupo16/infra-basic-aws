@@ -86,31 +86,7 @@ output "route_table_b" {
   value = aws_route_table_association.subnet_association_b.id
 }
 
-resource "aws_security_group" "security_group_load_balancer" {
-  name_prefix = "security-group-load-balancer"
-  description = "load balancer SG"
-  vpc_id      = aws_vpc.vpc_soat.id
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    infra = "vpc-soat"
-    Name  = "security-group-load-balancer"
-  }
-}
-
+#Security Group ECS
 resource "aws_security_group" "security_group_cluster_ecs" {
   name_prefix = "security-group-cluster-ecs"
   description = "cluster ecs SG"
@@ -150,71 +126,30 @@ resource "aws_security_group_rule" "security_group_cluster_ecs_ingress" {
   depends_on        = [aws_ecs_cluster.cluster_ecs_soat]
 }
 
-
-
-### Target Group + Load Balancer
-
-resource "aws_lb_target_group" "target_group_soat_api" {
-  depends_on = [ aws_vpc.vpc_soat ]
-  name        = "tg-soat-api"
-  port        = 8080
-  protocol    = "HTTP"
-  target_type = "ip"
+#Security Group DB
+resource "aws_security_group" "security_group_db" {
+  name_prefix = "security-group-fastfood-db"
+  description = "cluster ecs SG"
   vpc_id      = aws_vpc.vpc_soat.id
 
-  health_check {
-    enabled             = true
-    interval            = 30
-    matcher             = "200-299"
-    path                = "/health_check"
-    port                = "traffic-port"
-    protocol            = "HTTP"
-    timeout             = 5
-    healthy_threshold   = 5
-    unhealthy_threshold = 2
+  ingress {
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.security_group_load_balancer.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
-    infra = "tg-soat-api"
+    infra = "vpc-soat"
+    Name  = "security-group-fastfood-db"
   }
-}
-
-output "target_group_soat_api_arn" {
-  value = aws_lb_target_group.target_group_soat_api.arn
-}
-
-resource "aws_lb" "alb_soat_api" {
-  name               = "alb-soat-api"
-  internal           = true
-  load_balancer_type = "application"
-  ip_address_type    = "ipv4"
-
-  security_groups = [aws_security_group.security_group_load_balancer.id]
-  subnets = [
-    aws_subnet.soat_subnet_private1_us_east_1a.id,
-    aws_subnet.soat_subnet_private1_us_east_1b.id
-  ]
-
-  tags = {
-    infra = "alb-soat-api"
-  }
-}
-
-resource "aws_lb_listener" "alb_soat_listener" {
-  load_balancer_arn = aws_lb.alb_soat_api.arn
-  port              = 8080
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.target_group_soat_api.arn
-  }
-
-  tags = {
-    Name  = "alb-soat-listener"
-    infra = "alb-soat-listener"
-  }
-
 }
 
 ### ECS CONFIG ###
@@ -248,8 +183,8 @@ resource "aws_ecs_task_definition" "task_definition_ecs" {
       essential = true,
       portMappings = [
         {
-          containerPort = 8080
-          hostPort      = 8080
+          containerPort = 8000
+          hostPort      = 8000
           protocol      = "tcp"
           appProtocol   = "http"
         }
