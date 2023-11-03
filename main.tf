@@ -112,6 +112,11 @@ resource "aws_security_group" "security_group_load_balancer" {
   }
 }
 
+output "security_group_load_balancer_id" {
+  value = aws_security_group.security_group_load_balancer.id
+}
+
+
 #Security Group ECS
 resource "aws_security_group" "security_group_cluster_ecs" {
   name_prefix = "security-group-cluster-ecs"
@@ -140,16 +145,6 @@ resource "aws_security_group" "security_group_cluster_ecs" {
 
 output "security_group_ecs_id" {
   value = aws_security_group.security_group_cluster_ecs.id
-}
-
-resource "aws_security_group_rule" "security_group_cluster_ecs_ingress" {
-  type              = "ingress"
-  from_port         = 443
-  to_port           = 443
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.security_group_cluster_ecs.id
-  depends_on        = [aws_ecs_cluster.cluster_ecs_soat]
 }
 
 #Security Group DB
