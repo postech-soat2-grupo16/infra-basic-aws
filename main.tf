@@ -172,3 +172,21 @@ resource "aws_security_group" "security_group_db" {
     Name  = "security-group-fastfood-db"
   }
 }
+
+# DB Subnet group
+resource "aws_db_subnet_group" "db_rds_subnet_group" {
+  name = "subnet-group-rds"
+  subnet_ids = [
+    aws_subnet.soat_subnet_private1_us_east_1a.id,
+    aws_subnet.soat_subnet_private1_us_east_1b.id
+  ]
+
+  tags = {
+    Name  = "DB Subnet Group"
+    infra = "DB"
+  }
+}
+
+output "subnet_group_db_name" {
+  value = aws_db_subnet_group.db_rds_subnet_group.name
+}
