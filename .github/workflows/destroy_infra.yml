@@ -26,6 +26,3 @@ jobs:
 
       - name: Terraform Destroy
         run:  terraform destroy -auto-approve
-        env:
-          TF_VAR_ecr_image: ${{ vars.ECR_IMAGE }}
-          TF_VAR_execution_role_ecs: ${{ secrets.ECS_EXECUTION_ROLE }}
