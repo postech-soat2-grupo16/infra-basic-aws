@@ -5,9 +5,9 @@ provider "aws" {
 #Configuração do Terraform State
 terraform {
   backend "s3" {
-    bucket         = "terraform-state-soat"
-    key            = "infra-basic-aws/terraform.tfstate"
-    region         = "us-east-1"
+    bucket = "terraform-state-soat"
+    key    = "infra-basic-aws/terraform.tfstate"
+    region = "us-east-1"
 
     dynamodb_table = "terraform-state-soat-locking"
     encrypt        = true
@@ -84,6 +84,32 @@ resource "aws_route_table_association" "subnet_association_b" {
 
 output "route_table_b" {
   value = aws_route_table_association.subnet_association_b.id
+}
+
+#Security Group LB
+resource "aws_security_group" "security_group_load_balancer" {
+  name_prefix = "security-group-load-balancer"
+  description = "load balancer SG"
+  vpc_id      = aws_vpc.vpc_soat.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    infra = "vpc-soat"
+    Name  = "security-group-load-balancer"
+  }
 }
 
 #Security Group ECS
