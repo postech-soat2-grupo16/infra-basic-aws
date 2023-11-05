@@ -93,8 +93,8 @@ resource "aws_security_group" "security_group_load_balancer" {
   vpc_id      = aws_vpc.vpc_soat.id
 
   ingress {
-    from_port   = 80
-    to_port     = 80
+    from_port   = 8000
+    to_port     = 8000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -115,7 +115,6 @@ resource "aws_security_group" "security_group_load_balancer" {
 output "security_group_load_balancer_id" {
   value = aws_security_group.security_group_load_balancer.id
 }
-
 
 #Security Group ECS
 resource "aws_security_group" "security_group_cluster_ecs" {
@@ -150,7 +149,7 @@ output "security_group_ecs_id" {
 #Security Group DB
 resource "aws_security_group" "security_group_db" {
   name_prefix = "security-group-fastfood-db"
-  description = "cluster ecs SG"
+  description = "SG RDS"
   vpc_id      = aws_vpc.vpc_soat.id
 
   ingress {
