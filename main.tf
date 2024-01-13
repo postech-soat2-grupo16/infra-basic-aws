@@ -32,10 +32,16 @@ output "vpc_soat_id" {
 
 resource "aws_route_table" "route_table_a" {
   vpc_id = aws_vpc.vpc_soat.id
+  tags = {
+    Name = "route_table_a"
+  }
 }
 
 resource "aws_route_table" "route_table_b" {
   vpc_id = aws_vpc.vpc_soat.id
+  tags = {
+    Name = "route_table_b"
+  }
 }
 
 resource "aws_subnet" "soat_subnet_private1_us_east_1a" {
@@ -84,108 +90,4 @@ resource "aws_route_table_association" "subnet_association_b" {
 
 output "route_table_b" {
   value = aws_route_table_association.subnet_association_b.id
-}
-
-#Security Group LB
-resource "aws_security_group" "security_group_load_balancer" {
-  name_prefix = "security-group-load-balancer"
-  description = "load balancer SG"
-  vpc_id      = aws_vpc.vpc_soat.id
-
-  ingress {
-    from_port   = 8000
-    to_port     = 8000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    infra = "vpc-soat"
-    Name  = "security-group-load-balancer"
-  }
-}
-
-output "security_group_load_balancer_id" {
-  value = aws_security_group.security_group_load_balancer.id
-}
-
-#Security Group ECS
-resource "aws_security_group" "security_group_cluster_ecs" {
-  name_prefix = "security-group-cluster-ecs"
-  description = "cluster ecs SG"
-  vpc_id      = aws_vpc.vpc_soat.id
-
-  ingress {
-    from_port       = 8000
-    to_port         = 8000
-    protocol        = "tcp"
-    security_groups = [aws_security_group.security_group_load_balancer.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    infra = "vpc-soat"
-    Name  = "security-group-cluster-ecs"
-  }
-}
-
-output "security_group_ecs_id" {
-  value = aws_security_group.security_group_cluster_ecs.id
-}
-
-#Security Group DB
-resource "aws_security_group" "security_group_db" {
-  name_prefix = "security-group-fastfood-db"
-  description = "SG RDS"
-  vpc_id      = aws_vpc.vpc_soat.id
-
-  ingress {
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.security_group_load_balancer.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    infra = "vpc-soat"
-    Name  = "security-group-fastfood-db"
-  }
-}
-
-# DB Subnet group
-resource "aws_db_subnet_group" "db_rds_subnet_group" {
-  name = "subnet-group-rds"
-  subnet_ids = [
-    aws_subnet.soat_subnet_private1_us_east_1a.id,
-    aws_subnet.soat_subnet_private1_us_east_1b.id
-  ]
-
-  tags = {
-    Name  = "DB Subnet Group"
-    infra = "DB"
-  }
-}
-
-output "subnet_group_db_name" {
-  value = aws_db_subnet_group.db_rds_subnet_group.name
 }
